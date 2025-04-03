@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.app.sharedfast"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.app.sharedfast"
