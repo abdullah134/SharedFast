@@ -12,6 +12,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import android.widget.EditText
 import android.widget.Toast
 import java.io.File
+// import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController  // Add this import
+import com.app.sharedfast.R  // Add this import
+
 
 class HomeFragment : Fragment() {
 
@@ -42,8 +46,18 @@ class HomeFragment : Fragment() {
         return root
     }
 
+
     private fun setupRecyclerView() {
-        val adapter = FolderAdapter()
+        val adapter = FolderAdapter { folder ->
+            // Handle folder click
+            val bundle = Bundle().apply {
+                putString("folderPath", folder.absolutePath)
+            }
+            findNavController().navigate(
+                R.id.action_global_to_folder_content,
+                bundle
+            )
+        }
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = androidx.recyclerview.widget.GridLayoutManager(context, 2)
         
