@@ -1,0 +1,32 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "gradle",
+			"id": "c:\\Users\\Abdullah\\AndroidStudioProjects\\SharedFastbuildShared Fast",
+			"script": "build",
+			"description": "Assembles and tests this project.",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"project": "Shared Fast",
+			"buildFile": "C:\\Users\\Abdullah\\AndroidStudioProjects\\SharedFast\\build.gradle.kts",
+			"rootProject": "Shared Fast",
+			"projectFolder": "c:\\Users\\Abdullah\\AndroidStudioProjects\\SharedFast",
+			"workspaceFolder": "c:\\Users\\Abdullah\\AndroidStudioProjects\\SharedFast",
+			"args": "",
+			"javaDebug": false,
+			"problemMatcher": [
+				"$gradle"
+			],
+			"label": "gradle: build"
+		},
+		{
+            "label": "run",
+            "type": "shell",
+            "command": "./gradlew run",
+            "problemMatcher": []
+        },
+	]
+}

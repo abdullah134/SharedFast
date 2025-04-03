@@ -1,6 +1,5 @@
 package com.app.sharedfast.ui.home
 
-import InternalNotesManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -27,23 +26,48 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
+
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
-        var notes = InternalNotesManager.listFilesInNotesDirectory(requireContext())
-
-        val textView: TextView = binding.textHome
-        homeViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = notes.toString()
-        }
-
+        
+        setupRecyclerView()
+        setupViewToggle()
+        
         // Add FAB click listener
         binding.fabAddFolder.setOnClickListener {
             showCreateFolderDialog()
         }
 
         return root
+    }
+
+    private fun setupRecyclerView() {
+        val adapter = FolderAdapter()
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = androidx.recyclerview.widget.GridLayoutManager(context, 2)
+        
+        val notes = InternalNotesManager.listFilesInNotesDirectory(requireContext())
+        adapter.updateFolders(notes)
+    }
+
+    private fun setupViewToggle() {
+        binding.viewToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                when (checkedId) {
+                    binding.toggleGrid.id -> {
+                        binding.recyclerView.layoutManager = 
+                            androidx.recyclerview.widget.GridLayoutManager(context, 2)
+                    }
+                    binding.toggleList.id -> {
+                        binding.recyclerView.layoutManager = 
+                            androidx.recyclerview.widget.LinearLayoutManager(context)
+                    }
+                }
+            }
+        }
+        // Set initial selection
+//        binding.toggleGrid.isChecked = true
     }
 
     private fun showCreateFolderDialog() {
@@ -56,7 +80,7 @@ class HomeFragment : Fragment() {
             .setPositiveButton("Create") { dialog, _ ->
                 val folderName = editText.text.toString()
                 if (folderName.isNotEmpty()) {
-                    InternalNotesManager.createFolder(requireContext(),folderName)
+                    createFolder(folderName)
                 } else {
                     Toast.makeText(context, "Folder name cannot be empty", Toast.LENGTH_SHORT).show()
                 }
@@ -68,7 +92,20 @@ class HomeFragment : Fragment() {
             .show()
     }
 
-
+    private fun createFolder(folderName: String) {
+        val notesDir = InternalNotesManager.getOrCreateNotesDirectory(requireContext())
+        if (notesDir != null) {
+            val newFolder = File(notesDir, folderName)
+            if (newFolder.mkdir()) {
+                Toast.makeText(context, "Folder created successfully", Toast.LENGTH_SHORT).show()
+                // Refresh the RecyclerView
+                (binding.recyclerView.adapter as FolderAdapter)
+                    .updateFolders(InternalNotesManager.listFilesInNotesDirectory(requireContext()))
+            } else {
+                Toast.makeText(context, "Failed to create folder", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -50,7 +50,7 @@ object InternalNotesManager {
      * @return A List of File Name representing the contents, or an empty list if
      *         the directory doesn't exist, isn't a directory, is empty, or an error occurred.
      */
-    fun listFilesInNotesDirectory(context: Context): List<String> {
+    fun listFilesInNotesDirectory(context: Context): List<File> {
         val notesDir = getOrCreateNotesDirectory(context)
 
         if (notesDir == null) {
@@ -70,10 +70,7 @@ object InternalNotesManager {
         return if (filesArray != null) {
             Log.i(TAG, "Found ${filesArray.size} items in ${notesDir.name}")
             //return only names of files not the full path
-            filesArray.toList().map { file ->
-                Log.d(TAG, "File: ${file.name}")
-                file.name // Return the File object itself
-            }
+            filesArray.toList()
         } else {
             Log.e(TAG, "Failed to list files in ${notesDir.absolutePath}. listFiles() returned null.")
             emptyList() // Return empty list on error
