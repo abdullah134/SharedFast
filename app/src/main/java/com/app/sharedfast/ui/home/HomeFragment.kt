@@ -11,18 +11,15 @@ import com.app.sharedfast.databinding.FragmentHomeBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.content.ContentProviderCompat.requireContext
 import java.io.File
 // import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController  // Add this import
 import com.app.sharedfast.R  // Add this import
 
-
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -30,15 +27,12 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
-        
+
         setupRecyclerView()
         setupViewToggle()
-        
-        // Add FAB click listener
+
         binding.fabAddFolder.setOnClickListener {
             showCreateFolderDialog()
         }
@@ -46,42 +40,39 @@ class HomeFragment : Fragment() {
         return root
     }
 
-
     private fun setupRecyclerView() {
         val adapter = FolderAdapter { folder ->
-            // Handle folder click
             val bundle = Bundle().apply {
                 putString("folderPath", folder.absolutePath)
             }
-            findNavController().navigate(
-                R.id.action_global_to_folder_content,
-                bundle
-            )
+            findNavController().navigate(R.id.action_global_to_folder_content, bundle)
         }
         binding.recyclerView.adapter = adapter
-        binding.recyclerView.layoutManager = androidx.recyclerview.widget.GridLayoutManager(context, 2)
-        
+        binding.recyclerView.layoutManager = androidx.recyclerview.widget.GridLayoutManager(requireContext(), 2)
+
         val notes = InternalNotesManager.listFilesInNotesDirectory(requireContext())
         adapter.updateFolders(notes)
     }
 
     private fun setupViewToggle() {
-        binding.viewToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (isChecked) {
-                when (checkedId) {
-                    binding.toggleGrid.id -> {
-                        binding.recyclerView.layoutManager = 
-                            androidx.recyclerview.widget.GridLayoutManager(context, 2)
-                    }
-                    binding.toggleList.id -> {
-                        binding.recyclerView.layoutManager = 
-                            androidx.recyclerview.widget.LinearLayoutManager(context)
-                    }
-                }
-            }
+        val toggleGrid = binding.toggleGrid
+        val toggleList = binding.toggleList
+
+        toggleGrid.setOnClickListener {
+            toggleGrid.isChecked = true
+            toggleList.isChecked = false
+            binding.recyclerView.layoutManager =
+                androidx.recyclerview.widget.GridLayoutManager(requireContext(), 2)
         }
-        // Set initial selection
-//        binding.toggleGrid.isChecked = true
+
+        toggleList.setOnClickListener {
+            toggleList.isChecked = true
+            toggleGrid.isChecked = false
+            binding.recyclerView.layoutManager =
+                androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+        }
+
+        toggleGrid.isChecked = true
     }
 
     private fun showCreateFolderDialog() {
@@ -112,7 +103,6 @@ class HomeFragment : Fragment() {
             val newFolder = File(notesDir, folderName)
             if (newFolder.mkdir()) {
                 Toast.makeText(context, "Folder created successfully", Toast.LENGTH_SHORT).show()
-                // Refresh the RecyclerView
                 (binding.recyclerView.adapter as FolderAdapter)
                     .updateFolders(InternalNotesManager.listFilesInNotesDirectory(requireContext()))
             } else {

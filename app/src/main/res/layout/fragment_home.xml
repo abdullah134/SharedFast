@@ -6,37 +6,40 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
-    <com.google.android.material.button.MaterialButtonToggleGroup
+
+    <LinearLayout
         android:id="@+id/viewToggleGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_margin="2dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:singleSelection="true">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <Button
+        <ToggleButton
             android:id="@+id/toggleGrid"
-            style="?attr/materialButtonOutlinedStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Grid" />
+            android:textOff="Grid"
+            android:textOn="Grid"
+            android:drawableTop="@android:drawable/ic_dialog_dialer" />
 
-        <Button
+        <ToggleButton
             android:id="@+id/toggleList"
-            style="?attr/materialButtonOutlinedStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="List" />
-    </com.google.android.material.button.MaterialButtonToggleGroup>
+            android:textOff="List"
+            android:textOn="List"
+            android:drawableTop="@android:drawable/ic_menu_sort_by_size" />
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/viewToggleGroup" />
+        app:layout_constraintTop_toBottomOf="@id/viewToggleGroup"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_folder"
@@ -48,5 +51,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
