@@ -1,5 +1,6 @@
 package com.app.sharedfast.ui.folder
 
+import FolderFileAdapter
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -8,17 +9,19 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.core.content.FileProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.sharedfast.databinding.FragmentFolderContentBinding
 import java.io.File
-import android.widget.Toast
 
 class FolderContentFragment : Fragment() {
     private var _binding: FragmentFolderContentBinding? = null
     private val binding get() = _binding!!
     private lateinit var currentFolder: File
     private lateinit var photoFile: File
+    private lateinit var fileAdapter: FolderFileAdapter
 
     companion object {
         private const val REQUEST_IMAGE_CAPTURE = 1
@@ -33,25 +36,29 @@ class FolderContentFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentFolderContentBinding.inflate(inflater, container, false)
-        
+
         currentFolder = File(requireArguments().getString("folderPath")!!)
         setupUI()
         return binding.root
     }
 
     private fun setupUI() {
+        // Initialize RecyclerView with layout manager
+        binding.recyclerViewFiles.layoutManager = LinearLayoutManager(requireContext())
+        fileAdapter = FolderFileAdapter()
+        binding.recyclerViewFiles.adapter = fileAdapter
+
         binding.btnAddImage.setOnClickListener { pickImage() }
         binding.btnAddVideo.setOnClickListener { pickVideo() }
         binding.btnAddAudio.setOnClickListener { pickAudio() }
         binding.btnTakePhoto.setOnClickListener { takePhoto() }
-        
+
         refreshContent()
     }
 
     private fun refreshContent() {
-        // Implement RecyclerView adapter to show folder contents
-        val files = currentFolder.listFiles()?.toList() ?: emptyList()
-        // Update RecyclerView with files
+        val files = currentFolder.listFiles()?.sortedByDescending { it.lastModified() } ?: emptyList()
+        fileAdapter.updateFiles(files)
     }
 
     private fun pickImage() {
@@ -97,9 +104,35 @@ class FolderContentFragment : Fragment() {
     }
 
     private fun copyFileToFolder(uri: Uri) {
-        // Implement file copying logic here
-        // Copy the selected file to currentFolder
+        val contentResolver = requireContext().contentResolver
+        val fileName = getFileNameFromUri(uri) ?: "file_${System.currentTimeMillis()}"
+        val destFile = File(currentFolder, fileName)
+
+        try {
+            contentResolver.openInputStream(uri)?.use { inputStream ->
+                destFile.outputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+            }
+            Toast.makeText(requireContext(), "File added: $fileName", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Failed to copy file: ${e.message}", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
+
         refreshContent()
+    }
+
+    private fun getFileNameFromUri(uri: Uri): String? {
+        var name: String? = null
+        val cursor = requireContext().contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val index = it.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
+                if (index != -1) name = it.getString(index)
+            }
+        }
+        return name
     }
 
     override fun onDestroyView() {

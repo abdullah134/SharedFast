@@ -99,12 +99,14 @@ class HomeFragment : Fragment() {
 
     private fun createFolder(folderName: String) {
         val notesDir = InternalNotesManager.getOrCreateNotesDirectory(requireContext())
+        println("Notes directory path: ${notesDir?.absolutePath}")
         if (notesDir != null) {
             val newFolder = File(notesDir, folderName)
             if (newFolder.mkdir()) {
                 Toast.makeText(context, "Folder created successfully", Toast.LENGTH_SHORT).show()
                 (binding.recyclerView.adapter as FolderAdapter)
                     .updateFolders(InternalNotesManager.listFilesInNotesDirectory(requireContext()))
+                Toast.makeText(context, newFolder.absolutePath, Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(context, "Failed to create folder", Toast.LENGTH_SHORT).show()
             }
